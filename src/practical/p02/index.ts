@@ -1,4 +1,4 @@
-import axios from "axios";
+import { getPostalAddress } from "../p01";
 type newUser = {
   name:string;
   username?:string;
@@ -21,12 +21,6 @@ type newUser = {
     bs:string;
   };
 };
-type ApiUser = {
-  id:number;
-  name?:string;
-  phone?:string;
-  address?:newUser["address"];
-};
 type UserOutput = {
   id:number;
   name:string | null;
@@ -36,26 +30,18 @@ type UserOutput = {
 
 export async function addUser(newUserData:newUser|null):Promise<UserOutput[]> {
   try {
-    const url = "https://jsonplaceholder.typicode.com/users";
-    const response = await axios.get<ApiUser[]>(url);
-    const data = response.data;
-    const users: UserOutput[] = data.map((u) => ({
-      id: u.id,
-      name: u.name ?? null,
-      phone: u.phone ?? null,
-      address: u.address ?? null,
-    }));
+    const us = await getPostalAddress();
     if (!newUserData) {
-      return users;
+      return us;
     }
-    const lastId = users[users.length - 1]?.id ?? 0;
+    const lastId = us[us.length - 1]?.id ?? 0;
     const addedUser: UserOutput = {
       id:lastId + 1,
       name:newUserData.name ?? null,
       phone:newUserData.phone ?? null,
       address:newUserData.address ?? null,
     };
-    return [...users, addedUser];
+    return [...us, addedUser];
   } catch {
     return [];
   }
